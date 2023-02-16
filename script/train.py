@@ -27,7 +27,8 @@
 #You can do this by replacing 'B' with 0 and 'M' with 1 in both y_true and y_pred arrays.
 # To do this, you can modify the evaluate_model() function as follows:
 
-
+# prompt 5: Now add the code for saving the model and scaling model `scaler` 
+# output: ure, here's the modified code with the trained model and scaler saved to disk:
 
 import pandas as pd
 import numpy as np
@@ -36,6 +37,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_curve, auc
 import matplotlib.pyplot as plt
+import pickle
 
 def load_data(file_path):
     """Load the dataset from a csv file."""
@@ -55,7 +57,7 @@ def prepare_data(df, target_col, test_size=0.3, random_state=42):
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
-    return X_train, X_test, y_train, y_test
+    return X_train, X_test, y_train, y_test, scaler
 
 def train_model(X_train, y_train):
     """Train a logistic regression model on the training data."""
@@ -95,10 +97,18 @@ if __name__ == "__main__":
     df = drop_columns(df, ["id"])
 
     # Prepare the data for training
-    X_train, X_test, y_train, y_test = prepare_data(df, "diagnosis")
+    X_train, X_test, y_train, y_test, scaler = prepare_data(df, "diagnosis")
 
     # Train the model
     model = train_model(X_train, y_train)
+
+    # Save the trained model
+    with open("trained_model.pkl", "wb") as f:
+        pickle.dump(model, f)
+
+    # save the scaler model
+    with open("scaler_model.pkl", "wb") as f:
+        pickle.dump(scaler, f)
 
     # Evaluate the model
     accuracy, confusion, classification, fpr, tpr, auc_score = evaluate_model(model, X_test, y_test)
